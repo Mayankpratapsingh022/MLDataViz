@@ -44,7 +44,7 @@ const DataPointAdder = () => {
 
   const renderPlot = () => {
     const svgWidth = 500;
-    const svgHeight = 300;
+    const svgHeight = 500;
     const margin = { top: 20, right: 20, bottom: 40, left: 50 };
 
     const width = svgWidth - margin.left - margin.right;
@@ -55,7 +55,8 @@ const DataPointAdder = () => {
       .select("#scatterplot")
       .append("svg")
       .attr("width", svgWidth)
-      .attr("height", svgHeight);
+      .attr("height", svgHeight)
+      .style('background', '#252428');
 
     const xScale = d3.scaleLinear().domain([0, 10]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, 120]).range([height, 0]);
@@ -78,7 +79,7 @@ const DataPointAdder = () => {
       .append("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", 5)
+      .attr("r", 10)
       .style("fill", "#9f7aea")
       .style("cursor", "pointer")
       .on("mouseover", function (event, d) {
@@ -165,10 +166,34 @@ const DataPointAdder = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-black text-white p-6 rounded-lg shadow-md">
-      <h1 className="text-xl font-medium mb-4">Scatterplot Data Points</h1>
-      <div id="scatterplot" className="mb-6"></div>
-      <div className="overflow-auto max-h-60">
+    <div className=" flex gap-5  flex-wrap  flex-col my-10  text-white  rounded-lg shadow-md drop-shadow-md">
+ <h1 className="text-2xl font-medium underline my-4">Add your Data Points</h1>
+<section className="flex flex-wrap flew-row w-full p-5 ">
+<div className="p-5 bg-[#252428] rounded-lg drop-shadow-2xl w-fit h-fit lg:w-2/6 md:w-1/4">
+      <div id="scatterplot" className="w-fit p-5  items-center justify-center h-auto "></div>
+      </div>
+      <div className="flex flex-col w-full lg:w-1/2 md:w-1/2  mx-auto mt-6">
+      <div className="flex gap-4">
+
+   
+          <button
+            className="bg-maincolor text-white px-4 py-2 rounded hover:bg-gray-700"
+            onClick={randomizeData}
+          >
+            Randomize
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-500"
+            onClick={resetData}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      </section>
+    <section className="flex flex-wrap">
+      {/* <div className="overflow-scroll w-fit ">
         <Table>
           <TableCaption>A list of your scatterplot data points.</TableCaption>
           <TableHeader>
@@ -176,6 +201,7 @@ const DataPointAdder = () => {
               <TableHead>
                 <input
                   type="checkbox"
+                  className=""
                   onChange={(e) =>
                     setData((prevData) =>
                       prevData.map((point) => ({
@@ -194,60 +220,48 @@ const DataPointAdder = () => {
             {data.map((point) => (
               <TableRow
                 key={point.id}
-                className={`${
-                  point.selected ? "bg-gray-700" : ""
-                } hover:bg-gray-700 transition-colors duration-200`}
+               
               >
                 <TableCell>
                   <input
                     type="checkbox"
+                    className=" "
                     checked={point.selected}
                     onChange={() => toggleSelect(point.id)}
+                  
                   />
+
+                  
                 </TableCell>
                 <TableCell>
                   <input
                     type="number"
                     value={point.x.toFixed(2)}
                     onChange={(e) => updateData(point.id, "x", e.target.value)}
-                    className="bg-transparent border-none text-white text-center w-full appearance-none"
+                    className="bg-transparent focus:outline-none focus:border-neutral-500 focus:border  text-white text-center w-fit p-4 appearance-none"
                   />
+                  
+    
+          
+
+
+
                 </TableCell>
                 <TableCell>
                   <input
                     type="number"
                     value={point.y.toFixed(2)}
                     onChange={(e) => updateData(point.id, "y", e.target.value)}
-                    className="bg-transparent border-none text-white text-center w-full appearance-none"
+                    className="bg-transparent focus:outline-none focus:border-neutral-500 focus:border  text-white text-center w-fit p-4 appearance-none"
                   />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex justify-between mt-4">
-        <button
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
-          onClick={deleteSelected}
-        >
-          Delete Selected
-        </button>
-        <div className="flex gap-4">
-          <button
-            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
-            onClick={randomizeData}
-          >
-            Randomize
-          </button>
-          <button
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500"
-            onClick={resetData}
-          >
-            Reset
-          </button>
-        </div>
-      </div>
+      </div> */}
+     
+      </section>
     </div>
   );
 };
