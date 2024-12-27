@@ -9,12 +9,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-
+import ErrorVisualization from "../algo/linear-regression/ErrorVis";
+import DataTable from "../algo/linear-regression/table";
+import ErrorExplanation from "../algo/linear-regression/errorblog";
+import GradientDescentTraining from "../algo/linear-regression/Train";
 
 
 export default function LinearRegressionPage() {
     return (
-      <div className="min-h-screen  flex justify-center items-start  bg-[#19181B] text-white p-6">
+      <div className="min-h-screen  flex justify-center items-center   bg-[#19181B] text-white p-2">
+    
    <DataProvider>
         <div className="md:w-2/3 sm:w-5/6">
         <Breadcrumb className="pb-10 pt-5 ">
@@ -33,9 +37,12 @@ export default function LinearRegressionPage() {
 
         <LinePlot/>
 <DataPointAdder/>
-
-
+<DataTable/>
+<ErrorVisualization/>
+<ErrorExplanation/>
+<GradientDescentTraining/>
         </div></DataProvider>
+      
       </div>
     );
   }

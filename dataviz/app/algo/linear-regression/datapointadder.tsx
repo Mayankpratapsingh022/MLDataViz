@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, createContext, useContext } from "react";
 import * as d3 from "d3";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -40,23 +41,25 @@ const DataPointAdder = () => {
 
   useEffect(() => {
     renderPlot();
+    window.addEventListener("resize", renderPlot);
+    return () => window.removeEventListener("resize", renderPlot);
   }, [data, hoveredPoint]);
 
   const renderPlot = () => {
-    const svgWidth = 500;
-    const svgHeight = 500;
+    const container = d3.select("#scatterplot");
+    const containerWidth = container.node().getBoundingClientRect().width;
+    const svgSize = Math.min(containerWidth, 500); // Maintain a square aspect ratio
     const margin = { top: 20, right: 20, bottom: 40, left: 50 };
 
-    const width = svgWidth - margin.left - margin.right;
-    const height = svgHeight - margin.top - margin.bottom;
+    const width = svgSize - margin.left - margin.right;
+    const height = svgSize - margin.top - margin.bottom;
 
     d3.select("#scatterplot").selectAll("*").remove();
-    const svg = d3
-      .select("#scatterplot")
+    const svg = container
       .append("svg")
-      .attr("width", svgWidth)
-      .attr("height", svgHeight)
-      .style('background', '#252428');
+      .attr("width", svgSize)
+      .attr("height", svgSize)
+      .style("background", "#252428");
 
     const xScale = d3.scaleLinear().domain([0, 10]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, 120]).range([height, 0]);
@@ -79,7 +82,7 @@ const DataPointAdder = () => {
       .append("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", 10)
+      .attr("r", 5) // Static circle size
       .style("fill", "#9f7aea")
       .style("cursor", "pointer")
       .on("mouseover", function (event, d) {
@@ -130,26 +133,6 @@ const DataPointAdder = () => {
     });
   };
 
-  const deleteSelected = () => {
-    setData((prevData) => prevData.filter((point) => !point.selected));
-  };
-
-  const toggleSelect = (id) => {
-    setData((prevData) =>
-      prevData.map((point) =>
-        point.id === id ? { ...point, selected: !point.selected } : point
-      )
-    );
-  };
-
-  const updateData = (id, field, value) => {
-    setData((prevData) =>
-      prevData.map((point) =>
-        point.id === id ? { ...point, [field]: parseFloat(value) } : point
-      )
-    );
-  };
-
   const randomizeData = () => {
     setData(
       Array.from({ length: 10 }, (_, i) => ({
@@ -166,101 +149,47 @@ const DataPointAdder = () => {
   };
 
   return (
-    <div className=" flex gap-5  flex-wrap  flex-col my-10  text-white  rounded-lg shadow-md drop-shadow-md">
- <h1 className="text-2xl font-medium underline my-4">Add your Data Points</h1>
-<section className="flex flex-wrap flew-row w-full p-5 ">
-<div className="p-5 bg-[#252428] rounded-lg drop-shadow-2xl w-fit h-fit lg:w-2/6 md:w-1/4">
-      <div id="scatterplot" className="w-fit p-5  items-center justify-center h-auto "></div>
-      </div>
-      <div className="flex flex-col w-full lg:w-1/2 md:w-1/2  mx-auto mt-6">
-      <div className="flex gap-4">
-
-   
-          <button
-            className="bg-maincolor text-white px-4 py-2 rounded hover:bg-gray-700"
-            onClick={randomizeData}
-          >
-            Randomize
-          </button>
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-500"
-            onClick={resetData}
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-
-      </section>
-    <section className="flex flex-wrap">
-      {/* <div className="overflow-scroll w-fit ">
-        <Table>
-          <TableCaption>A list of your scatterplot data points.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <input
-                  type="checkbox"
-                  className=""
-                  onChange={(e) =>
-                    setData((prevData) =>
-                      prevData.map((point) => ({
-                        ...point,
-                        selected: e.target.checked,
-                      }))
-                    )
-                  }
-                />
-              </TableHead>
-              <TableHead>X</TableHead>
-              <TableHead>Y</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((point) => (
-              <TableRow
-                key={point.id}
-               
-              >
-                <TableCell>
-                  <input
-                    type="checkbox"
-                    className=" "
-                    checked={point.selected}
-                    onChange={() => toggleSelect(point.id)}
-                  
-                  />
-
-                  
-                </TableCell>
-                <TableCell>
-                  <input
-                    type="number"
-                    value={point.x.toFixed(2)}
-                    onChange={(e) => updateData(point.id, "x", e.target.value)}
-                    className="bg-transparent focus:outline-none focus:border-neutral-500 focus:border  text-white text-center w-fit p-4 appearance-none"
-                  />
-                  
-    
+    <div className="flex gap-5 flex-wrap flex-col my-10 text-white rounded-lg ">
+      <h1 className="text-2xl font-medium underline my-4">Add your Data Points</h1>
+      <section className="flex flex-wrap flex-row w-full">
+        <div className=" p-3 bg-[#252428] rounded-lg drop-shadow-2xl w-full lg:w-2/6 md:w-1/2">
           
+          <div id="scatterplot" className="w-full h-full"></div>
+        
+        </div>
+        <div className="flex flex-col flex-wrap w-full lg:w-1/2 md:w-1/2 mx-auto mt-6">
+          <div className="flex gap-4">
+            <Button variant="main" onClick={randomizeData}>
+              Randomize
+            </Button>
 
+            <Button variant="destructive" onClick={resetData}>
+              Reset
+            </Button>
+          </div>
 
+          <section className="text-white rounded-lg shadow-lg max-w-5xl mt-10 text-left">
+  <p className="text-sm leading-relaxed">
+    Use the <span className="inline-block bg-maincolor text-white px-2 py-1 rounded font-medium">Data Point Adder</span> tool to add and interact with points on the graph.
+  </p>
+  <b className="text-sm text-white rounded font-semibold underline mt-4 block">Features:</b>
+  <ul className="mt-2 space-y-1 text-sm">
+    <li>
+      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Click</span>: Add a point at the clicked position.
+    </li>
+    <li>
+      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Hover</span>: Show <span className="font-semibold">X</span>, <span className="font-semibold">Y</span> coordinates.
+    </li>
+    <li>
+      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Randomize</span>: Generate random points.
+    </li>
+    <li>
+      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Reset</span>: Clear all points.
+    </li>
+  </ul>
+</section>
 
-                </TableCell>
-                <TableCell>
-                  <input
-                    type="number"
-                    value={point.y.toFixed(2)}
-                    onChange={(e) => updateData(point.id, "y", e.target.value)}
-                    className="bg-transparent focus:outline-none focus:border-neutral-500 focus:border  text-white text-center w-fit p-4 appearance-none"
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div> */}
-     
+        </div>
       </section>
     </div>
   );
