@@ -14,6 +14,7 @@ import DataTable from "../algo/linear-regression/table";
 import ErrorExplanation from "../algo/linear-regression/errorblog";
 import GradientDescentTraining from "../algo/linear-regression/Train";
 import TrainBlog from "../algo/linear-regression/Trainblog";
+import SocialLinks from "../about/profile";
 
 export default function LinearRegressionPage() {
     return (
@@ -42,8 +43,11 @@ export default function LinearRegressionPage() {
 <ErrorExplanation/>
 <GradientDescentTraining/>
 <TrainBlog/>
+<footer className="">
+      <SocialLinks/>
+      </footer>
         </div></DataProvider>
-      
+     
       </div>
     );
   }

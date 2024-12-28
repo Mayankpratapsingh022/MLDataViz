@@ -1,11 +1,11 @@
 import Link from "next/link";
+import SocialLinks from "../about/profile";
 
 const Topics = () => {
   const topics = [
     { name: "Linear Regression", path: "/linear-regression" },
-    { name: "Logistic Regression", path: "/logistic-regression" },
-    { name: "Support Vector Machines", path: "/svm" },
-    { name: "Decision Trees", path: "/decision-trees" },
+    { name: "More Algorithms Coming Soon", path: "/linear-regression" },
+
   ];
 
   return (
@@ -20,13 +20,16 @@ const Topics = () => {
           <li key={index} className="text-gray-400 hover:text-white transition-colors duration-200">
             <Link
               href={topic.path}
-              className="text-gray-100 underline hover:text-gray-300"
+              className="text-blue-400 underline hover:text-gray-300"
             >
               {topic.name}
             </Link>
           </li>
         ))}
       </ul>
+      <footer className="">
+      <SocialLinks/>
+      </footer>
     </div>
   );
 };
