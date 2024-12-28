@@ -1,30 +1,50 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+  useCallback,
+} from "react";
 import * as d3 from "d3";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-// Create a Context for sharing data
-const DataContext = createContext();
+// Define the shape of the context data
+interface DataPoint {
+  id: number;
+  x: number;
+  y: number;
+  selected: boolean;
+}
 
-export const DataProvider = ({ children }) => {
-  const [data, setData] = useState(
-    Array.from({ length: 10 }, (_, i) => ({
-      id: i,
-      x: parseFloat((i + Math.random()).toFixed(2)),
-      y: parseFloat((i * 10 + Math.random() * 20).toFixed(2)),
-      selected: false,
-    }))
-  );
+interface DataContextType {
+  data: DataPoint[];
+  setData: React.Dispatch<React.SetStateAction<DataPoint[]>>;
+}
+
+// Create a Context with a default value
+const DataContext = createContext<DataContextType | undefined>(undefined);
+
+// DataProvider props type
+interface DataProviderProps {
+  children: ReactNode;
+}
+
+export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
+  const [data, setData] = useState<DataPoint[]>([]);
+  useEffect(() => {
+    // Initialize with random data
+    setData(
+      Array.from({ length: 10 }, (_, i) => ({
+        id: i,
+        x: parseFloat((i + Math.random()).toFixed(2)),
+        y: parseFloat((i * 10 + Math.random() * 20).toFixed(2)),
+        selected: false,
+      }))
+    );
+  }, []);
 
   return (
     <DataContext.Provider value={{ data, setData }}>
@@ -33,28 +53,36 @@ export const DataProvider = ({ children }) => {
   );
 };
 
-export const useData = () => useContext(DataContext);
+// Custom hook to use the DataContext
+export const useData = (): DataContextType => {
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error("useData must be used within a DataProvider");
+  }
+  return context;
+};
 
-const DataPointAdder = () => {
+// Component: DataPointAdder
+const DataPointAdder: React.FC = () => {
   const { data, setData } = useData();
-  const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [hoveredPoint, setHoveredPoint] = useState<DataPoint | null>(null);
 
-  useEffect(() => {
-    renderPlot();
-    window.addEventListener("resize", renderPlot);
-    return () => window.removeEventListener("resize", renderPlot);
-  }, [data, hoveredPoint]);
-
-  const renderPlot = () => {
+  // Use useCallback to memoize renderPlot
+  const renderPlot = useCallback(() => {
     const container = d3.select("#scatterplot");
-    const containerWidth = container.node().getBoundingClientRect().width;
+    const containerNode = container.node();
+
+    // Ensure the containerNode is of type HTMLElement
+    if (!(containerNode instanceof HTMLElement)) return;
+
+    const containerWidth = containerNode.getBoundingClientRect().width;
     const svgSize = Math.min(containerWidth, 500); // Maintain a square aspect ratio
     const margin = { top: 20, right: 20, bottom: 40, left: 50 };
 
     const width = svgSize - margin.left - margin.right;
     const height = svgSize - margin.top - margin.bottom;
 
-    d3.select("#scatterplot").selectAll("*").remove();
+    container.selectAll("*").remove();
     const svg = container
       .append("svg")
       .attr("width", svgSize)
@@ -131,7 +159,14 @@ const DataPointAdder = () => {
       };
       setData((prevData) => [...prevData, newPoint]);
     });
-  };
+  }, [data, hoveredPoint, setData]); // Add all dependencies here
+
+  // useEffect with renderPlot in the dependency array
+  useEffect(() => {
+    renderPlot();
+    window.addEventListener("resize", renderPlot);
+    return () => window.removeEventListener("resize", renderPlot);
+  }, [renderPlot]);
 
   const randomizeData = () => {
     setData(
@@ -152,43 +187,18 @@ const DataPointAdder = () => {
     <div className="flex gap-5 flex-wrap flex-col my-10 text-white rounded-lg ">
       <h1 className="text-2xl font-medium underline my-4">Add your Data Points</h1>
       <section className="flex flex-wrap flex-row w-full">
-        <div className=" p-3 bg-[#252428] rounded-lg drop-shadow-2xl w-full lg:w-2/6 md:w-1/2">
-          
+        <div className="p-3 bg-[#252428] rounded-lg drop-shadow-2xl w-full lg:w-2/6 md:w-1/2">
           <div id="scatterplot" className="w-full h-full"></div>
-        
         </div>
         <div className="flex flex-col flex-wrap w-full lg:w-1/2 md:w-1/2 mx-auto mt-6">
           <div className="flex gap-4">
             <Button variant="main" onClick={randomizeData}>
               Randomize
             </Button>
-
             <Button variant="destructive" onClick={resetData}>
               Reset
             </Button>
           </div>
-
-          <section className="text-white rounded-lg shadow-lg max-w-5xl mt-10 text-left">
-  <p className="text-sm leading-relaxed">
-    Use the <span className="inline-block bg-maincolor text-white px-2 py-1 rounded font-medium">Data Point Adder</span> tool to add and interact with points on the graph.
-  </p>
-  <b className="text-sm text-white rounded font-semibold underline mt-4 block">Features:</b>
-  <ul className="mt-2 space-y-1 text-sm">
-    <li>
-      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Click</span>: Add a point at the clicked position.
-    </li>
-    <li>
-      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Hover</span>: Show <span className="font-semibold">X</span>, <span className="font-semibold">Y</span> coordinates.
-    </li>
-    <li>
-      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Randomize</span>: Generate random points.
-    </li>
-    <li>
-      <span className="inline-block bg-maincolor px-2 py-1 rounded font-medium">Reset</span>: Clear all points.
-    </li>
-  </ul>
-</section>
-
         </div>
       </section>
     </div>

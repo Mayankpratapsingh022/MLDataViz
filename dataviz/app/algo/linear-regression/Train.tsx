@@ -6,7 +6,7 @@ import { useData } from "./datapointadder";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 
-const ErrorByIterationPlot = ({ errorHistory, maxIterations }) => {
+const ErrorByIterationPlot = ({ errorHistory  = [], maxIterations = 100}) => {
   useEffect(() => {
     const svgWidth = 500;
     const svgHeight = 300;
@@ -24,9 +24,9 @@ const ErrorByIterationPlot = ({ errorHistory, maxIterations }) => {
 
     const xScale = d3.scaleLinear().domain([0, maxIterations + 50]).range([0, width]);
     const yScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(errorHistory) || 1])
-      .range([height, 0]);
+    .scaleLinear()
+    .domain([0, d3.max(errorHistory.map(Number).filter((value) => !isNaN(value))) || 1])
+    .range([height, 0]);
 
     const g = svg
       .append("g")
@@ -54,10 +54,10 @@ const ErrorByIterationPlot = ({ errorHistory, maxIterations }) => {
       .style("font-size", "14px")
       .text("Error");
 
-    const line = d3
+      const line = d3
       .line()
-      .x((d, i) => xScale(i))
-      .y((d) => yScale(d))
+      .x((d, i) => xScale(i)) // Use index for x-axis
+      .y((d) => yScale(d))    
       .curve(d3.curveMonotoneX);
 
     g.append("path")
@@ -77,11 +77,11 @@ const GradientDescentTraining = () => {
   const [weight, setWeight] = useState(0);
   const [bias, setBias] = useState(0);
   const [learningRate, setLearningRate] = useState(0.01);
-  const [errorHistory, setErrorHistory] = useState([]);
+  const [errorHistory, setErrorHistory] = useState<number[]>([]);
   const [isTraining, setIsTraining] = useState(false);
   const [iterations, setIterations] = useState(0);
   const [maxIterations, setMaxIterations] = useState(30);
-  const tolerance = 0.0001;
+
 
   const calculateError = () => {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import * as d3 from "d3";
 import { useData } from "./datapointadder";
 import { Slider } from "@/components/ui/slider";
@@ -9,18 +9,17 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
-import { Terminal } from "lucide-react"
+import { Terminal } from "lucide-react";
  
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert"
+} from "@/components/ui/alert";
 
 const ErrorVisualization = () => {
   const { data } = useData();
@@ -28,16 +27,9 @@ const ErrorVisualization = () => {
   const [bias, setBias] = useState(0);
   const [totalError, setTotalError] = useState(0);
   const [errorType, setErrorType] = useState("absolute");
-  const [errorHistory, setErrorHistory] = useState([]);
+  const [errorHistory, setErrorHistory] = useState<number[]>([]);
 
-  useEffect(() => {
-    renderErrorPlot();
-    if (errorType !== "none") {
-      updateErrorHistory();
-    }
-  }, [data, weight, bias, errorType]);
-
-  const calculateError = () => {
+  const calculateError = useCallback(() => {
     if (errorType === "absolute") {
       return data.reduce((sum, point) => {
         const predictedY = weight * point.x + bias;
@@ -52,20 +44,17 @@ const ErrorVisualization = () => {
       );
     }
     return 0;
-  };
-
-  const updateErrorHistory = () => {
-    const newError = calculateError();
-    setErrorHistory((prevHistory) => [...prevHistory, newError]);
-  };
-
-  useEffect(() => {
-    setTotalError(calculateError());
   }, [data, weight, bias, errorType]);
 
-  const renderErrorPlot = () => {
+  const updateErrorHistory = useCallback(() => {
+    const newError = calculateError();
+    setErrorHistory((prevHistory) => [...prevHistory, newError]);
+  }, [calculateError]);
+
+  const renderErrorPlot = useCallback(() => {
     const container = d3.select("#errorplot");
-    const parentWidth = container.node().clientWidth || 500;
+    const parentWidth = (container.node() as HTMLElement)?.clientWidth || 500;
+
     const aspectRatio = 4 / 4;
     const svgWidth = parentWidth;
     const svgHeight = svgWidth / aspectRatio;
@@ -147,36 +136,17 @@ const ErrorVisualization = () => {
 
     g.append("line")
       .attr("x1", xScale(0))
-      .attr("y1", yScale(weight *0 + bias))
+      .attr("y1", yScale(weight * 0 + bias))
       .attr("x2", xScale(10))
       .attr("y2", yScale(weight * 10 + bias))
       .attr("stroke", "#9f7aea")
       .attr("stroke-width", 3);
-  };
+  }, [data, weight, bias, errorType]);
 
-  const NoDataMessage = () => {
-  
-  
-  if (data.length === 0) {
-      return (
-
-        <Alert className="bg-red-500 text-white my-2">
-        <Terminal className="h-4 w-4 stroke-white " />
-        <AlertTitle>Error!</AlertTitle>
-        <AlertDescription>
-        No data points. Add some above to visualize errors.
-        </AlertDescription>
-      </Alert>
-     
-      );
-    }
-  
-    return null;
-  };
-
-  const renderErrorHistoryPlot = () => {
+  const renderErrorHistoryPlot = useCallback(() => {
     const container = d3.select("#errorHistoryPlot");
-    const parentWidth = container.node().clientWidth || 500;
+    const parentWidth = (container.node() as HTMLElement)?.clientWidth || 500;
+
     const aspectRatio = 16 / 9;
     const svgWidth = parentWidth;
     const svgHeight = svgWidth / aspectRatio;
@@ -196,11 +166,14 @@ const ErrorVisualization = () => {
       .domain([0, errorHistory.length])
       .range([0, width]);
 
-    const yScale = d3
+      const filteredErrorHistory = errorHistory.filter((d): d is number => d !== undefined);
+      
+      const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(errorHistory)])
-      .range([height, 0]);
+      .domain([0, d3.max(filteredErrorHistory) || 0])
 
+      .range([height, 0]);
+    
     const g = svg
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -226,57 +199,78 @@ const ErrorVisualization = () => {
       .style("text-anchor", "middle")
       .text("Error");
 
-    const line = d3
-      .line()
-      .x((d, i) => xScale(i))
-      .y((d) => yScale(d))
+      const line = d3
+      .line<[number, number]>() // Specify the type as a tuple of [x, y]
+      .x((d) => xScale(d[0]))   // Access the first element (x)
+      .y((d) => yScale(d[1]))   // Access the second element (y)
       .curve(d3.curveMonotoneX);
-
+    
     g.append("path")
-      .datum(errorHistory)
+      .datum(
+        errorHistory.map((value, index) => [index, value]) as [number, number][]
+      ) // Transform errorHistory into an array of tuples [x, y]
       .attr("fill", "none")
       .attr("stroke", "red")
       .attr("stroke-width", 2)
       .attr("d", line);
-  };
+    
+  }, [errorHistory]);
+
+  useEffect(() => {
+    renderErrorPlot();
+    if (errorType !== "none") {
+      updateErrorHistory();
+    }
+  }, [data, weight, bias, errorType, renderErrorPlot, updateErrorHistory]);
+
+  useEffect(() => {
+    setTotalError(calculateError());
+  }, [data, weight, bias, errorType, calculateError]);
 
   useEffect(() => {
     renderErrorHistoryPlot();
-  }, [errorHistory]);
+  }, [errorHistory, renderErrorHistoryPlot]);
+
+  const NoDataMessage = () => {
+    if (data.length === 0) {
+      return (
+        <Alert className="bg-red-500 text-white my-2">
+          <Terminal className="h-4 w-4 stroke-white " />
+          <AlertTitle>Error!</AlertTitle>
+          <AlertDescription>
+            No data points. Add some above to visualize errors.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="flex justify-start text-start items-center flex-col">
-            <h1 className="text-2xl font-medium underline w-full   my-8">Visualizing Errors</h1>
-            <NoDataMessage />
-
+      <h1 className="text-2xl font-medium underline w-full my-8">Visualizing Errors</h1>
+      <NoDataMessage />
       <div className="flex justify-start items-start flex-wrap flex-row w-full">
-        <div className="rounded-lg w-full md:w-full  lg:w-2/6 drop-shadow-md p-2 items-stretch bg-[#252428]">
+        <div className="rounded-lg w-full md:w-full lg:w-2/6 drop-shadow-md p-2 items-stretch bg-[#252428]">
           <div id="errorplot" className="max-w-3xl bg-[#252428]"></div>
         </div>
-        <section className="flex  flex-col p-2 flex-wrap justify-start w-full  h-full md:w-1/2 gap-4">
-          <div className=" md:w-1/2 w-full
-            px-5">
-          <Select
-          
-            onValueChange={(value) => setErrorType(value)}
-            value={errorType}
-          >
-            <SelectTrigger className=" mt-5">
-              <SelectValue placeholder="Select Error Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="absolute">Absolute Error</SelectItem>
-                <SelectItem value="meanSquare">Mean Square Error</SelectItem>
-                <SelectItem value="none">None</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <section className="flex flex-col p-2 flex-wrap justify-start w-full h-full md:w-1/2 gap-4">
+          <div className="md:w-1/2 w-full px-5">
+            <Select onValueChange={(value) => setErrorType(value)} value={errorType}>
+              <SelectTrigger className="mt-5">
+                <SelectValue placeholder="Select Error Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="absolute">Absolute Error</SelectItem>
+                  <SelectItem value="meanSquare">Mean Square Error</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <div className="mt-5 w-full max-w-3xl px-5">
-            <label className="block text-white mb-2">
-              Weight: {weight.toFixed(2)}
-            </label>
+            <label className="block text-white mb-2">Weight: {weight.toFixed(2)}</label>
             <Slider
               value={[weight]}
               onValueChange={([value]) => setWeight(value)}
@@ -285,7 +279,6 @@ const ErrorVisualization = () => {
               step={0.1}
               className="mb-5"
             />
-
             <label className="block text-white mb-2">Bias: {bias.toFixed(2)}</label>
             <Slider
               value={[bias]}
@@ -302,13 +295,7 @@ const ErrorVisualization = () => {
           Total {errorType === "absolute" ? "Absolute" : "Mean Square"} Error: {totalError.toFixed(2)}
         </div>
       )}
-
-      <div id="errorHistoryPlot" className="w-full md:w-1/2  max-w-3xl mt-5 bg-[#252428] p-2 rounded-md drop-shadow-md"></div>
-  
-  
-  
-
-
+      <div id="errorHistoryPlot" className="w-full md:w-1/2 max-w-3xl mt-5 bg-[#252428] p-2 rounded-md drop-shadow-md"></div>
     </div>
   );
 };

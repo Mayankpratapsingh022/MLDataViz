@@ -1,5 +1,3 @@
-import { MathJaxContext, MathJax } from "better-react-mathjax";
-
 const ErrorExplanation = () => {
     return (
 <section className="text-white rounded-lg shadow-lg max-w-5xl mt-10 text-left">

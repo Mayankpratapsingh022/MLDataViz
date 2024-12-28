@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 
 
 const LinePlot = () => {
-  const svgRef = useRef();
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
   const [slope, setSlope] = useState(1);
   const [intercept, setIntercept] = useState(0);
   const [lineRange, setLineRange] = useState(10);
@@ -84,12 +85,14 @@ const LinePlot = () => {
       .text('Y-Axis');
 
     // Plot line
+    type Point = { x: number; y: number };
+
     const line = d3
-      .line()
+      .line<Point>()
       .x((d) => xScale(d.x))
       .y((d) => yScale(d.y));
 
-    const lineData = [
+    const lineData:Point[] = [
       { x: -lineRange, y: slope * -lineRange + intercept },
       { x: lineRange, y: slope * lineRange + intercept },
     ];
