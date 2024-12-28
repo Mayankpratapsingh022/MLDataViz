@@ -208,7 +208,7 @@ const GradientDescentTraining = () => {
     <div className="flex flex-col items-center w-full flex-wrap p-2">
    <h1 className="text-2xl  font-medium underline text-start w-full mb-4">Visual Regression Trainer</h1>
 
-      <section className="flex gap-3 w-full  flex-wrap">
+      <section className="flex gap-3 w-full justify-center md:justify-start  items-center flex-wrap">
 <div className="p-2 bg-[#252428] rounded-md drop-shadow-lg">
       <div id="bestFitLinePlot" className="w-fit  "></div>
       </div>

@@ -12,7 +12,7 @@ const LinearRegressionBlog = () => {
   <p className="text-lg leading-relaxed mt-2">
     Gradient descent is an optimization algorithm used to minimize the error (or cost) function. The cost function in linear regression is defined as:
   </p>
-  <p className="text-lg font-mono bg-maincolor px-3 py-2 rounded inline-block my-4">
+  <p className="text-base font-mono bg-maincolor px-3 py-2 rounded inline-block my-4">
     J(m, b) = 𝟏/𝟐n ∑ (y<sub>i</sub> - (m𝑥<sub>i</sub> + b))²
   </p>
   <p className="text-lg leading-relaxed">

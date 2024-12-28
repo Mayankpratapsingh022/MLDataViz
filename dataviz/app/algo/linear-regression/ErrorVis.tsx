@@ -14,6 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { Terminal } from "lucide-react"
+ 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
+
 const ErrorVisualization = () => {
   const { data } = useData();
   const [weight, setWeight] = useState(1);
@@ -85,7 +93,7 @@ const ErrorVisualization = () => {
       .call(d3.axisBottom(xScale))
       .append("text")
       .attr("x", width / 2)
-      .attr("y", 50)
+      .attr("y", 100)
       .attr("fill", "white")
       .style("font-size", "14px")
       .text("X (Independent Variable)");
@@ -95,7 +103,7 @@ const ErrorVisualization = () => {
       .append("text")
       .attr("transform", "rotate(-90)")
       .attr("x", -height / 2)
-      .attr("y", -50)
+      .attr("y", -100)
       .attr("fill", "white")
       .style("font-size", "14px")
       .style("text-anchor", "middle")
@@ -139,11 +147,31 @@ const ErrorVisualization = () => {
 
     g.append("line")
       .attr("x1", xScale(0))
-      .attr("y1", yScale(weight * 0 + bias))
+      .attr("y1", yScale(weight *0 + bias))
       .attr("x2", xScale(10))
       .attr("y2", yScale(weight * 10 + bias))
       .attr("stroke", "#9f7aea")
       .attr("stroke-width", 3);
+  };
+
+  const NoDataMessage = () => {
+  
+  
+  if (data.length === 0) {
+      return (
+
+        <Alert className="bg-red-500 text-white my-2">
+        <Terminal className="h-4 w-4 stroke-white " />
+        <AlertTitle>Error!</AlertTitle>
+        <AlertDescription>
+        No data points. Add some above to visualize errors.
+        </AlertDescription>
+      </Alert>
+     
+      );
+    }
+  
+    return null;
   };
 
   const renderErrorHistoryPlot = () => {
@@ -219,6 +247,8 @@ const ErrorVisualization = () => {
   return (
     <div className="flex justify-start text-start items-center flex-col">
             <h1 className="text-2xl font-medium underline w-full   my-8">Visualizing Errors</h1>
+            <NoDataMessage />
+
       <div className="flex justify-start items-start flex-wrap flex-row w-full">
         <div className="rounded-lg w-full md:w-full  lg:w-2/6 drop-shadow-md p-2 items-stretch bg-[#252428]">
           <div id="errorplot" className="max-w-3xl bg-[#252428]"></div>
@@ -250,8 +280,8 @@ const ErrorVisualization = () => {
             <Slider
               value={[weight]}
               onValueChange={([value]) => setWeight(value)}
-              min={-5}
-              max={5}
+              min={-10}
+              max={10}
               step={0.1}
               className="mb-5"
             />
@@ -260,8 +290,8 @@ const ErrorVisualization = () => {
             <Slider
               value={[bias]}
               onValueChange={([value]) => setBias(value)}
-              min={-50}
-              max={50}
+              min={-100}
+              max={100}
               step={1}
             />
           </div>
@@ -273,7 +303,7 @@ const ErrorVisualization = () => {
         </div>
       )}
 
-      <div id="errorHistoryPlot" className="w-full max-w-3xl mt-5 bg-[#252428] p-2 rounded-md drop-shadow-md"></div>
+      <div id="errorHistoryPlot" className="w-full md:w-1/2  max-w-3xl mt-5 bg-[#252428] p-2 rounded-md drop-shadow-md"></div>
   
   
   

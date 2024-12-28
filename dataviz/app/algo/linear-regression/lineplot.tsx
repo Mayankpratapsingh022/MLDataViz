@@ -119,8 +119,8 @@ const LinePlot = () => {
     <div className="flex gap-5 flex-col">
       
    
-      <h1 className="text-2xl font-medium underline mb-4">Understanding the Line Equation</h1>
-      <section className="flex flex-wrap flex-row">
+      <h1 className="text-2xl font-medium underline  mb-4">Understanding the Line Equation</h1>
+      <section className="flex flex-wrap justify-center items-center flex-row">
      
         <div className="p-5 bg-[#252428] rounded-lg drop-shadow-2xl w-fit h-fit lg:w-2/6 md:w-1/4">
           <svg ref={svgRef} className="w-full h-auto "></svg>
