@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import * as d3 from "d3";
 import { useData } from "./datapointadder";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 
 const ErrorByIterationPlot = ({ errorHistory, maxIterations }) => {
   useEffect(() => {
@@ -20,7 +22,7 @@ const ErrorByIterationPlot = ({ errorHistory, maxIterations }) => {
       .attr("height", svgHeight)
 
 
-    const xScale = d3.scaleLinear().domain([0, maxIterations]).range([0, width]);
+    const xScale = d3.scaleLinear().domain([0, maxIterations + 50]).range([0, width]);
     const yScale = d3
       .scaleLinear()
       .domain([0, d3.max(errorHistory) || 1])
@@ -203,8 +205,8 @@ const GradientDescentTraining = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full p-4">
-      <h1 className="text-lg font-bold mb-4">Iteration: {iterations} | Current Error: {errorHistory[errorHistory.length - 1]?.toFixed(4) || 0}</h1>
+    <div className="flex flex-col items-center w-full flex-wrap p-2">
+   <h1 className="text-2xl  font-medium underline text-start w-full mb-4">Visual Regression Trainer</h1>
 
       <section className="flex gap-3 w-full  flex-wrap">
 <div className="p-2 bg-[#252428] rounded-md drop-shadow-lg">
@@ -215,52 +217,45 @@ const GradientDescentTraining = () => {
       {/* New Error vs. Iterations Plot */}
       <ErrorByIterationPlot errorHistory={errorHistory} maxIterations={maxIterations} />
       </section>
-      <div className="mt-4 flex flex-col items-start w-full">
+      <h1 className="text-sm md:text-base  text-start w-full font-bold my-4">
+        <b className="bg-[#873AFA] p-1  rounded-sm  font-medium">Iteration:</b> {iterations} <b className="bg-[#873AFA] p-1  rounded-sm font-medium">Current Error:</b>  {errorHistory[errorHistory.length - 1]?.toFixed(2) || 0}</h1>
+      <section className="flex flex-col flex-wrap justify-start w-full">
+      <div className="mt-4 flex flex-col items-start w-full md:w-1/2">
         <label className="mb-2">Learning Rate: {learningRate}</label>
-        <input
-          type="range"
-          min="0.001"
-          max="0.1"
-          step="0.001"
-          value={learningRate}
-          onChange={(e) => setLearningRate(parseFloat(e.target.value))}
+        <Slider
+          value={[learningRate]} // Explicitly set the value
+          max={0.1}
+          min={0.001}
+          step={0.001}
+          onValueChange={(value) => setLearningRate(value[0])}
         />
       </div>
 
-      <div className="mt-4 flex flex-col items-start w-full">
+      <div className="mt-4 flex flex-col items-start w-full md:w-1/2">
         <label className="mb-2">Max Iterations: {maxIterations}</label>
-        <input
-          type="range"
-          min="10"
-          max="100"
-          step="1"
-          value={maxIterations}
-          onChange={(e) => setMaxIterations(parseInt(e.target.value))}
+        <Slider
+          defaultValue={[maxIterations]}
+          max={100}
+          min={10}
+          step={1}
+          onValueChange={(value) => setMaxIterations(value[0])}
         />
       </div>
 
-      <div className="mt-6 flex justify-center space-x-4">
-        <button
-          onClick={() => setIsTraining(true)}
-          disabled={isTraining}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
+      <div className="mt-6 flex justify-start flex-wrap flex-col gap-2 md:w-1/2 w-full">
+      <Button onClick={() => setIsTraining(true)} disabled={isTraining} className="bg-[#873AFA]" variant="primary">
           Start Training
-        </button>
-        <button
-          onClick={() => setIsTraining(false)}
-          disabled={!isTraining}
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-        >
-          Stop Training
-        </button>
-        <button
-          onClick={resetTraining}
-          className="px-4 py-2 bg-red-500 text-white rounded"
-        >
+        </Button>
+<section className="w-full flex justify-center gap-3">
+        <Button onClick={() => setIsTraining(false)} disabled={!isTraining} className="w-full" variant="secondary">
+          Stop
+        </Button>
+        <Button onClick={resetTraining}  className="w-full" variant="destructive">
           Reset
-        </button>
+        </Button>
+        </section>
       </div>
+      </section>
     </div>
   );
 };

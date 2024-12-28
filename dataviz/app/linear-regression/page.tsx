@@ -13,7 +13,7 @@ import ErrorVisualization from "../algo/linear-regression/ErrorVis";
 import DataTable from "../algo/linear-regression/table";
 import ErrorExplanation from "../algo/linear-regression/errorblog";
 import GradientDescentTraining from "../algo/linear-regression/Train";
-
+import TrainBlog from "../algo/linear-regression/Trainblog";
 
 export default function LinearRegressionPage() {
     return (
@@ -41,6 +41,7 @@ export default function LinearRegressionPage() {
 <ErrorVisualization/>
 <ErrorExplanation/>
 <GradientDescentTraining/>
+<TrainBlog/>
         </div></DataProvider>
       
       </div>
