@@ -220,6 +220,7 @@ const GradientDescentTraining = () => {
       <h1 className="text-sm md:text-base  text-start w-full font-bold my-4">
         <b className="bg-[#873AFA] p-1  rounded-sm  font-medium">Iteration:</b> {iterations} <b className="bg-[#873AFA] p-1  rounded-sm font-medium">Current Error:</b>  {errorHistory[errorHistory.length - 1]?.toFixed(2) || 0}</h1>
       <section className="flex flex-col flex-wrap justify-start w-full">
+        <p className="text-white">Click 'Reset First' to refresh data points.</p>
       <div className="mt-4 flex flex-col items-start w-full md:w-1/2">
         <label className="mb-2">Learning Rate: {learningRate}</label>
         <Slider

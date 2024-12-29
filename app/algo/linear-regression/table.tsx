@@ -22,13 +22,6 @@ const DataTable = () => {
     setClientData(data);
   }, [data]);
 
-  if (!data.length) {
-    return (
-      <div className="flex justify-center items-center text-white mt-4">
-        <p>No data available. Add some data points to visualize here.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex w-full justify-center items-center my-8">
